@@ -58,19 +58,3 @@ class AgentProfile(models.Model):
         return f"{self.user.full_name} - {self.vehicle_type} ({self.verification_status})"
 
 
-class OTP(models.Model):
-    CHOICES = (
-        ('registration', 'Registration'),
-        ('login', 'Login'),
-        ('password_reset', 'Password Reset'),
-    )
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otps')
-    code = models.CharField(max_length=6)
-    is_used = models.BooleanField(default=False)
-    created_for = models.CharField(max_length=50, choices=CHOICES)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-
-    def __str__(self):
-        return f"{self.user.phone} - {self.code} ({self.created_for})"
