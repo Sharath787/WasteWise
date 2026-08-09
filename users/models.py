@@ -1,7 +1,28 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
 
+class UserManager(BaseUserManager):
+    def create_user(self, phone, email, full_name, password=None):
+        if not phone:
+            raise ValueError('Phone number is required')
+        email = self.normalize_email(email)
+        user = self.model(phone=phone, email=email, full_name=full_name)
+        user.set_unusable_password()
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, phone, email, full_name, password=None):
+        email = self.normalize_email(email)
+        user = self.model(phone=phone, email=email, full_name=full_name)
+        user.set_password(password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self._db)
+        return user
+
+    
 class User(AbstractUser):
     first_name = None
     last_name = None
@@ -12,7 +33,8 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255)
 
     USERNAME_FIELD = 'phone'
-    REQUIRED_FIELDS = ['email']
+    objects = UserManager()
+    REQUIRED_FIELDS = ['email', 'full_name']
 
     def __str__(self):
         return f"{self.full_name} ({self.phone})"
