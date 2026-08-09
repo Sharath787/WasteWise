@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, CustomerProfile, AgentProfile
+from .models import CustomerAddress, User, CustomerProfile, AgentProfile
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -26,4 +26,9 @@ class CustomerProfileAdmin(admin.ModelAdmin):
 class AgentProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'vehicle_type', 'verification_status', 'is_available')
     list_filter = ('verification_status', 'is_available')
+
+
+@admin.register(CustomerAddress)
+class CustomerAddressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'address', 'label', 'is_default')
 

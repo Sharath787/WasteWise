@@ -1,15 +1,16 @@
 from django.db import models
+from base.models import BaseModel
 
 # Create your models here.
 
-class WasteType(models.Model):
+class WasteType(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
     
-class Yard(models.Model):
+class Yard(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     contact_number = models.CharField(max_length=15, unique=True)
     address = models.CharField(max_length=255)
@@ -26,7 +27,7 @@ class Yard(models.Model):
     def __str__(self):
         return self.name
 
-class YardWasteCapacity(models.Model):
+class YardWasteCapacity(BaseModel):
     yard = models.ForeignKey(Yard, on_delete=models.CASCADE)
     waste_type = models.ForeignKey(WasteType, on_delete=models.CASCADE)
     capacity = models.FloatField()  # Capacity in tons or any other unit you prefer
