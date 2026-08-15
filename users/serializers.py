@@ -1,13 +1,14 @@
 from rest_framework import serializers
-from .models import User, CustomerProfile, AgentProfile
+
+from .models import AgentProfile, User
 from .validators import (
-    validate_phone_number,
-    validate_otp,
     validate_fullname,
-    validate_phone_not_registered,
-    validate_phone_is_registered,
+    validate_otp,
     validate_phone_has_agent_profile,
-    validate_phone_no_agent_profile
+    validate_phone_is_registered,
+    validate_phone_no_agent_profile,
+    validate_phone_not_registered,
+    validate_phone_number,
 )
 
 
@@ -17,12 +18,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "phone", "email", "full_name"]
 
 
-class checkPhoneSerializer(serializers.Serializer):
+class CheckPhoneSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=15, validators=[validate_phone_number])
 
 
 # customer registratio Page 1 - (Collect details and send otp)
-class CustomerRegistrationSerializer(serializers.ModelSerializer):
+class CustomerRegistrationSerializer(serializers.Serializer):
     phone = serializers.CharField(
         max_length=15, validators=[validate_phone_number, validate_phone_not_registered]
     )
@@ -40,11 +41,13 @@ class CustomerRegistrationVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
     profile_picture = serializers.ImageField(required=False, allow_null=True)
 
-#Customer login send otp serializer
+
+# Customer login send otp serializer
 class CustomerLoginSendOTPSerializer(serializers.Serializer):
     phone = serializers.CharField(
         max_length=15, validators=[validate_phone_number, validate_phone_is_registered]
     )
+
 
 # Customer login verify otp serializer
 class CustomerLoginVerifySerializer(serializers.Serializer):
@@ -57,7 +60,8 @@ class CustomerLoginVerifySerializer(serializers.Serializer):
 # Agent registration page 1 - (Collect details and send otp)
 class AgentRegistrationSerializer(serializers.Serializer):
     phone = serializers.CharField(
-        max_length=15, validators=[validate_phone_number, validate_phone_no_agent_profile]
+        max_length=15,
+        validators=[validate_phone_number, validate_phone_no_agent_profile],
     )
     full_name = serializers.CharField(max_length=255, validators=[validate_fullname])
     email = serializers.EmailField()
@@ -70,7 +74,8 @@ class AgentRegistrationSerializer(serializers.Serializer):
 # Agent registration page 2 - (verify OTP and create agent profile)
 class AgentRegistrationVerifySerializer(serializers.Serializer):
     phone = serializers.CharField(
-        max_length=15, validators=[validate_phone_number, validate_phone_no_agent_profile]
+        max_length=15,
+        validators=[validate_phone_number, validate_phone_no_agent_profile],
     )
     otp = serializers.CharField(max_length=6, validators=[validate_otp])
     full_name = serializers.CharField(max_length=255, validators=[validate_fullname])
@@ -93,11 +98,13 @@ class AgentLoginVerifySerializer(serializers.Serializer):
     )
     otp = serializers.CharField(max_length=6, validators=[validate_otp])
 
+
 class AgentLoginSendOTPSerializer(serializers.Serializer):
     phone = serializers.CharField(
         max_length=15,
-        validators=[validate_phone_number, validate_phone_has_agent_profile]
+        validators=[validate_phone_number, validate_phone_has_agent_profile],
     )
+
 
 class AgentProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
