@@ -1,18 +1,19 @@
+import uuid
 from time import timezone
 
-from django.db import models
-import uuid
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
+
 from base.models import BaseModel
 
 
 class UserManager(BaseUserManager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
-    
+
     def create_user(self, phone, email, full_name, password=None):
         if not phone:
-            raise ValueError('Phone number is required')
+            raise ValueError("Phone number is required")
         email = self.normalize_email(email)
         user = self.model(phone=phone, email=email, full_name=full_name)
         user.set_unusable_password()
@@ -28,7 +29,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    
+
 class User(AbstractUser):
     first_name = None
     last_name = None
@@ -42,10 +43,12 @@ class User(AbstractUser):
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(blank=True, null=True)
 
-    USERNAME_FIELD = 'phone'
+    USERNAME_FIELD = "phone"
     objects = UserManager()
-    all_objects = models.Manager()  # This manager returns all records, including deleted ones
-    REQUIRED_FIELDS = ['email', 'full_name']
+    all_objects = (
+        models.Manager()
+    )  # This manager returns all records, including deleted ones
+    REQUIRED_FIELDS = ["email", "full_name"]
 
     def __str__(self):
         return f"{self.full_name} ({self.phone})"
@@ -58,8 +61,12 @@ class User(AbstractUser):
 
 
 class CustomerProfile(BaseModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
-    profile_picture = models.ImageField(upload_to='customer/profile_pictures/', blank=True, null=True)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="customer_profile"
+    )
+    profile_picture = models.ImageField(
+        upload_to="customer/profile_pictures/", blank=True, null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -68,36 +75,50 @@ class CustomerProfile(BaseModel):
 
 
 class AgentProfile(BaseModel):
-    STATUS = (
-        ('pending', 'Pending'),
-        ('verified', 'Verified'),
-        ('rejected', 'Rejected'),
-        ('suspended', 'Suspended'),
-    )
-    VEHICLE_TYPES = (
-        ('bike', 'Bike'),
-        ('truck', 'Truck'),
-        ('ape', 'Ape'),
-    )
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        VERIFIED = "verified", "Verified"
+        REJECTED = "rejected", "Rejected"
+        SUSPENDED = "suspended", "Suspended"
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='agent_profile')
-    profile_picture = models.ImageField(upload_to='agent/profile_pictures/', blank=True, null=True)
+    class VehicleType(models.TextChoices):
+        BIKE = "bike", "Bike"
+        TRUCK = "truck", "Truck"
+        APE = "ape", "Ape"
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="agent_profile"
+    )
+    profile_picture = models.ImageField(
+        upload_to="agent/profile_pictures/", blank=True, null=True
+    )
     license_number = models.CharField(max_length=50, unique=True)
     date_of_birth = models.DateField(blank=True, null=True)
-    vehicle_type = models.CharField(max_length=50, choices=VEHICLE_TYPES, blank=True, null=True)
+    vehicle_type = models.CharField(
+        max_length=50, choices=VehicleType.choices, blank=True, null=True
+    )
     vehicle_registration_number = models.CharField(max_length=50, blank=True, null=True)
-    verification_status = models.CharField(max_length=20, choices=STATUS, default='pending')
-    cur_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
-    cur_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
+    verification_status = models.CharField(
+        max_length=20, choices=Status.choices, default="pending"
+    )
+    cur_latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True
+    )
+    cur_longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True
+    )
     is_available = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.full_name} - {self.vehicle_type} ({self.verification_status})"
+        return (
+            f"{self.user.full_name} - {self.vehicle_type} ({self.verification_status})"
+        )
+
 
 class CustomerAddress(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="addresses")
     label = models.CharField(max_length=100)
     address = models.CharField(max_length=500)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
@@ -105,6 +126,5 @@ class CustomerAddress(BaseModel):
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    
     def __str__(self):
         return f"{self.user.full_name} - {self.label} - {self.address}"

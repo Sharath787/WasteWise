@@ -1,34 +1,41 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import CustomerAddress, User, CustomerProfile, AgentProfile
+
+from .models import AgentProfile, CustomerAddress, CustomerProfile, User
+
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    ordering = ('phone',)
-    list_display = ('phone', 'email', 'full_name', 'is_active')
+    ordering = ("phone",)
+    list_display = ("phone", "email", "full_name", "is_active")
     fieldsets = (
-        (None, {'fields': ('phone','password')}),
-        ('Personal Info', {'fields': ('full_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        (None, {"fields": ("phone", "password")}),
+        ("Personal Info", {"fields": ("full_name", "email")}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser")}),
     )
 
     add_fieldsets = (
-        (None, {'classes': 'wide', 'fields': ('phone', 'email', 'full_name', 'password1', 'password2')}),
+        (
+            None,
+            {
+                "classes": "wide",
+                "fields": ("phone", "email", "full_name", "password1", "password2"),
+            },
+        ),
     )
 
 
 @admin.register(CustomerProfile)
 class CustomerProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created_at')
+    list_display = ("user", "created_at")
 
 
 @admin.register(AgentProfile)
 class AgentProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'vehicle_type', 'verification_status', 'is_available')
-    list_filter = ('verification_status', 'is_available')
+    list_display = ("user", "vehicle_type", "verification_status", "is_available")
+    list_filter = ("verification_status", "is_available")
 
 
 @admin.register(CustomerAddress)
 class CustomerAddressAdmin(admin.ModelAdmin):
-    list_display = ('user', 'address', 'label', 'is_default')
-
+    list_display = ("user", "address", "label", "is_default")

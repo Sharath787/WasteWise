@@ -1,7 +1,9 @@
 from django.db import models
+
 from base.models import BaseModel
 
 # Create your models here.
+
 
 class WasteType(BaseModel):
     name = models.CharField(max_length=100, unique=True)
@@ -9,7 +11,8 @@ class WasteType(BaseModel):
 
     def __str__(self):
         return self.name
-    
+
+
 class Yard(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     contact_number = models.CharField(max_length=15, unique=True)
@@ -23,9 +26,9 @@ class Yard(BaseModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     def __str__(self):
         return self.name
+
 
 class YardWasteCapacity(BaseModel):
     yard = models.ForeignKey(Yard, on_delete=models.CASCADE)
@@ -34,11 +37,7 @@ class YardWasteCapacity(BaseModel):
     current_fill_kg = models.FloatField(default=0.0)  # Current fill in kilograms
 
     class Meta:
-        unique_together = ('yard', 'waste_type')
+        unique_together = ("yard", "waste_type")
 
     def __str__(self):
         return f"{self.yard.name} - {self.waste_type.name} Capacity: {self.capacity}"
-    
-
-
-
