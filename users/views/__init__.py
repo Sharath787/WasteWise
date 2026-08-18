@@ -28,3 +28,4 @@ from users.views.customer import (
 from users.views.customer import (
     CustomerRegisterView as CustomerRegisterView,
 )
+
