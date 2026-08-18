@@ -75,12 +75,13 @@ class CustomerRegisterView(APIView):
 
         phone = serializer.validated_data["phone"]
 
-        can_send, message = can_send_otp(phone)
+        can_send, message, retry_after = can_send_otp(phone)
 
         if not can_send:
             return Response(
                 {
                     "error": message,
+                    "retry_after": retry_after,
                 },
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
@@ -159,12 +160,13 @@ class CustomerLoginSendOTPView(APIView):
 
         phone = serializer.validated_data["phone"]
 
-        can_send, message = can_send_otp(phone)
+        can_send, message, retry_after = can_send_otp(phone)
 
         if not can_send:
             return Response(
                 {
                     "error": message,
+                    "retry_after": retry_after,
                 },
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )

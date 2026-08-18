@@ -15,6 +15,7 @@ from users.serializers import (
     UserSerializer,
 )
 from users.utils import (
+    OTP_COOLDOWN_TIME,
     can_send_otp,
     generate_otp,
     send_otp,
@@ -39,6 +40,7 @@ class AgentCheckPhoneView(APIView):
                     "user_exists": False,
                     "agent_exists": False,
                     "prefill": None,
+                    "otp_cooldown_seconds": OTP_COOLDOWN_TIME,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -53,6 +55,7 @@ class AgentCheckPhoneView(APIView):
                     "user_exists": True,
                     "agent_exists": True,
                     "prefill": None,
+                    "otp_cooldown_seconds": OTP_COOLDOWN_TIME,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -66,6 +69,7 @@ class AgentCheckPhoneView(APIView):
                     "email": user.email,
                     "full_name": user.full_name,
                 },
+                "otp_cooldown_seconds": OTP_COOLDOWN_TIME,
             },
             status=status.HTTP_200_OK,
         )
@@ -80,13 +84,11 @@ class AgentRegisterView(APIView):
 
         phone = serializer.validated_data["phone"]
 
-        can_send, message = can_send_otp(phone)
+        can_send, message, retry_after = can_send_otp(phone)
 
         if not can_send:
             return Response(
-                {
-                    "error": message,
-                },
+                {"error": message, "retry_after": retry_after},
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
@@ -164,11 +166,15 @@ class AgentLoginSendOTPView(APIView):
 
         phone = serializer.validated_data["phone"]
 
-        can_send, message = can_send_otp(phone)
+        can_send, message, retry_after = can_send_otp(phone)
 
         if not can_send:
             return Response(
-                {"error": message}, status=status.HTTP_429_TOO_MANY_REQUESTS
+                {
+                    "error": message,
+                    "retry_after": retry_after,
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
         otp = generate_otp()

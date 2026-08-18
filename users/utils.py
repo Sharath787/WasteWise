@@ -30,9 +30,13 @@ def send_otp(phone, otp):
 
 
 def can_send_otp(phone):
-    if redis_client.exists(f"otp_cooldown:{phone}"):
-        return False, "Please wait 30 seconds before requesting a new OTP."
-    return True, "OK"
+    cooldown_key = f"otp_cooldown:{phone}"
+    ttl = redis_client.ttl(cooldown_key)
+
+    if ttl > 0:
+        return False, f"Please wait {ttl} seconds before requesting a new OTP.", ttl
+
+    return True, "OK", 0
 
 
 def store_otp(phone, otp):
