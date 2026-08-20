@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,8 +10,8 @@ from users.models import AgentProfile, User
 from users.serializers import (
     AgentLoginSendOTPSerializer,
     AgentLoginVerifySerializer,
-    AgentRegistrationSerializer,
-    AgentRegistrationVerifySerializer,
+    AgentRegisterSerializer,
+    AgentRegisterVerifySerializer,
     CheckPhoneSerializer,
     UserSerializer,
 )
@@ -27,7 +28,7 @@ from users.utils import (
 class AgentCheckPhoneView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = CheckPhoneSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -78,8 +79,8 @@ class AgentCheckPhoneView(APIView):
 class AgentRegisterView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        serializer = AgentRegistrationSerializer(data=request.data)
+    def post(self, request: Request) -> Response:
+        serializer = AgentRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         phone = serializer.validated_data["phone"]
@@ -102,8 +103,8 @@ class AgentRegisterView(APIView):
 class AgentRegisterVerifyView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        serializer = AgentRegistrationVerifySerializer(data=request.data)
+    def post(self, request: Request) -> Response:
+        serializer = AgentRegisterVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         phone = serializer.validated_data["phone"]
@@ -160,7 +161,7 @@ class AgentRegisterVerifyView(APIView):
 class AgentLoginSendOTPView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = AgentLoginSendOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -192,7 +193,7 @@ class AgentLoginSendOTPView(APIView):
 class AgentLoginVerifyView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = AgentLoginVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

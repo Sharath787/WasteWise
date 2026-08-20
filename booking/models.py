@@ -92,4 +92,4 @@ class Booking(BaseModel):
             )
 
     def __str__(self):
-        return f"Booking {self.id} - {self.user.full_name} - {self.status}"
+        return f"Booking {self.id} - {self.customer.full_name} - {self.status}"

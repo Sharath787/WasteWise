@@ -1,17 +1,24 @@
 import uuid
-from time import timezone
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.db.models import QuerySet
+from django.utils import timezone
 
 from base.models import BaseModel
 
 
-class UserManager(BaseUserManager):
-    def get_queryset(self):
+class UserManager(BaseUserManager["User"]):
+    def get_queryset(self) -> QuerySet["User"]:
         return super().get_queryset().filter(is_deleted=False)
 
-    def create_user(self, phone, email, full_name, password=None):
+    def create_user(
+        self,
+        phone: str,
+        email: str,
+        full_name: str,
+        password: str | None = None,
+    ) -> "User":
         if not phone:
             raise ValueError("Phone number is required")
         email = self.normalize_email(email)
@@ -20,7 +27,9 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, phone, email, full_name, password=None):
+    def create_superuser(
+        self, phone: str, email: str, full_name: str, password: str | None
+    ) -> "User":
         email = self.normalize_email(email)
         user = self.model(phone=phone, email=email, full_name=full_name)
         user.set_password(password)
@@ -31,9 +40,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    first_name = None
-    last_name = None
-    username = None
+    first_name = None  # type: ignore[assignment]
+    last_name = None  # type: ignore[assignment]
+    username = None  # type: ignore[assignment]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -44,16 +53,16 @@ class User(AbstractUser):
     deleted_at = models.DateTimeField(blank=True, null=True)
 
     USERNAME_FIELD = "phone"
-    objects = UserManager()
+    objects = UserManager()  # type: ignore[assignment]
     all_objects = (
         models.Manager()
     )  # This manager returns all records, including deleted ones
     REQUIRED_FIELDS = ["email", "full_name"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.full_name} ({self.phone})"
 
-    def soft_delete(self):
+    def soft_delete(self) -> None:
         """Soft delete the user by setting is_deleted to True."""
         self.is_deleted = True
         self.deleted_at = timezone.now()
@@ -111,7 +120,7 @@ class AgentProfile(BaseModel):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{self.user.full_name} - {self.vehicle_type} ({self.verification_status})"
         )
@@ -126,5 +135,5 @@ class CustomerAddress(BaseModel):
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user.full_name} - {self.label} - {self.address}"

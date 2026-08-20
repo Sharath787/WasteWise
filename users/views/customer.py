@@ -1,6 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -10,11 +11,12 @@ from users.serializers import (
     CheckPhoneSerializer,
     CustomerLoginSendOTPSerializer,
     CustomerLoginVerifySerializer,
-    CustomerRegistrationSerializer,
-    CustomerRegistrationVerifySerializer,
+    CustomerRegisterSerializer,
+    CustomerRegisterVerifySerializer,
     UserSerializer,
 )
 from users.utils import (
+    OTP_COOLDOWN_TIME,
     can_send_otp,
     generate_otp,
     send_otp,
@@ -26,7 +28,7 @@ from users.utils import (
 class CustomerCheckPhoneView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = CheckPhoneSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -39,6 +41,7 @@ class CustomerCheckPhoneView(APIView):
                 {
                     "user_exists": False,
                     "prefill": None,
+                    "otp_cooldown_seconds": OTP_COOLDOWN_TIME,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -47,7 +50,12 @@ class CustomerCheckPhoneView(APIView):
 
         if has_customer_profile:
             return Response(
-                {"user_exists": True, "prefill": None}, status=status.HTTP_200_OK
+                {
+                    "user_exists": True,
+                    "prefill": None,
+                    "otp_cooldown_seconds": OTP_COOLDOWN_TIME,
+                },
+                status=status.HTTP_200_OK,
             )
 
         # user exists but no customer profile
@@ -61,6 +69,7 @@ class CustomerCheckPhoneView(APIView):
                     "email": user.email,
                     "phone": user.phone,
                 },
+                "otp_cooldown_seconds": OTP_COOLDOWN_TIME,
             },
             status=status.HTTP_200_OK,
         )
@@ -69,8 +78,8 @@ class CustomerCheckPhoneView(APIView):
 class CustomerRegisterView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        serializer = CustomerRegistrationSerializer(data=request.data)
+    def post(self, request: Request) -> Response:
+        serializer = CustomerRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         phone = serializer.validated_data["phone"]
@@ -101,8 +110,8 @@ class CustomerRegisterView(APIView):
 class CustomerRegisterVerifyView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
-        serializer = CustomerRegistrationVerifySerializer(data=request.data)
+    def post(self, request: Request) -> Response:
+        serializer = CustomerRegisterVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         phone = serializer.validated_data["phone"]
@@ -154,7 +163,7 @@ class CustomerRegisterVerifyView(APIView):
 class CustomerLoginSendOTPView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = CustomerLoginSendOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -186,7 +195,7 @@ class CustomerLoginSendOTPView(APIView):
 class CustomerLoginVerifyView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         serializer = CustomerLoginVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

@@ -17,6 +17,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "djangorestframework-stubs>=3.18.0",
+    "pyright>=1.1.411",
     "ruff>=0.16.2",
 ]
 
@@ -31,3 +33,14 @@ ignore = ["E501"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "basic"
+exclude = [
+    '**/.*',
+    "**/node_modules/**",
+    "**/migrations/**",
+    "**/__pycache__/**",
+    ".venv/**",
+]

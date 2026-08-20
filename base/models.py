@@ -1,11 +1,12 @@
 import uuid
 
 from django.db import models
+from django.db.models import QuerySet
 from django.utils import timezone
 
 
 class ActiveManager(models.Manager):
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
         return super().get_queryset().filter(is_deleted=False)
 
 
@@ -23,7 +24,7 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True  # This model will not be used to create any database table
 
-    def soft_delete(self):
+    def soft_delete(self) -> None:
         """Soft delete the record by setting is_deleted to True."""
         self.is_deleted = True
         self.deleted_at = timezone.now()  # Optionally, you can add a deleted_at field to track when the record was deleted

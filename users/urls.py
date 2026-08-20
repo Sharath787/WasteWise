@@ -1,5 +1,5 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
+from rest_framework_simplejwt.views import TokenBlacklistView, TokenRefreshView
 
 from users.views import (
     AgentCheckPhoneView,
@@ -31,9 +31,8 @@ urlpatterns = [
     path("agent/register/verify/", AgentRegisterVerifyView.as_view()),
     path("agent/login/send_otp/", AgentLoginSendOTPView.as_view()),
     path("agent/login/verify/", AgentLoginVerifyView.as_view()),
-
-    #Token management
-    #name gives the url the unique identifier, so we can reference it by reverse('name')
-    path("token/refresh/", TokenRefreshView.as_view(), name='token-refresh'),
-    path("logout/", TokenBlacklistView.as_view(), name='logout'),
+    # Token management
+    # name gives the url the unique identifier, so we can reference it by reverse('name')
+    path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
+    path("logout/", TokenBlacklistView.as_view(), name="logout"),
 ]
